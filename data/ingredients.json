@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Farine",
+    "pricePerKg": 1.5
+  },
+  {
+    "name": "Beurre",
+    "pricePerKg": 8
+  },
+  {
+    "name": "Œufs",
+    "pricePerKg": 3.5
+  },
+  {
+    "name": "Lait",
+    "pricePerKg": 0.9
+  },
+  {
+    "name": "Chocolat",
+    "pricePerKg": 15
+  },
+  {
+    "name": "Levure",
+    "pricePerKg": 12
+  },
+  {
+    "name": "Vanille",
+    "pricePerKg": 30
+  },
+  {
+    "name": "Fruits secs",
+    "pricePerKg": 20
+  },
+  {
+    "name": "Amandes",
+    "pricePerKg": 25
+  },
+  {
+    "name": "Noisettes",
+    "pricePerKg": 22
+  },
+  {
+    "name": "Cannelle",
+    "pricePerKg": 40
+  },
+  {
+    "name": "Soja",
+    "pricePerKg": 10
+  }
+]

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de coût de recette</title>
+    <script defer src="script.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Calculateur de coût de recette</h1>
+
+        <div class="tabs">
+            <button class="tab-button" onclick="openTab('add')">Ajouter un ingrédient</button>
+            <button class="tab-button" onclick="openTab('search')">Supprimer un ingrédient</button>
+            <button class="tab-button" onclick="openTab('calculate')">Calculer le coût</button>
+        </div>
+
+        <div id="add" class="tab-content">
+            <h2>Ajouter un ingrédient</h2>
+            <form id="ingredientForm">
+                <input type="text" id="ingredientName" placeholder="Nom de l'ingrédient" required>
+                <input type="number" id="ingredientPrice" placeholder="Prix par kilo (€)" step="0.01" required>
+                <button type="submit">Ajouter Ingrédient</button>
+            </form>
+        </div>
+
+        <div id="search" class="tab-content select-hide">
+            <h2>Rechercher et supprimer un ingrédient</h2>
+            <select id="ingredientDropdown">
+                <option value="" disabled selected>Choisissez un ingrédient...</option>
+            </select>
+            <button id="deleteIngredientButton">Supprimer Ingrédient Sélectionné</button>
+        </div>
+
+        <div id="calculate" class="tab-content select-hide">
+            <h2>Calculer le coût de la recette</h2>
+            <form id="recipeForm">
+                <div id="recipeInputs"></div>
+                <button type="button" id="addIngredientButton">Ajouter un ingrédient</button>
+                <button type="submit">Calculer le coût de la recette</button>
+            </form>
+            <h3>Coût total de la recette : <span id="totalCost">0</span> €</h3>
+        </div>
+    </div>
+
+<script>
+    const ingredientForm = document.getElementById('ingredientForm');
+    const ingredientDropdown = document.getElementById('ingredientDropdown');
+    const deleteIngredientButton = document.getElementById('deleteIngredientButton');
+    const recipeForm = document.getElementById('recipeForm');
+    const recipeInputs = document.getElementById('recipeInputs');
+    const totalCost = document.getElementById('totalCost');
+    const addIngredientButton = document.getElementById('addIngredientButton');
+    let ingredientsData = [];
+
+    ingredientForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const name = document.getElementById('ingredientName').value;
+        const price = parseFloat(document.getElementById('ingredientPrice').value);
+
+        const response = await fetch('/ingredients', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name, pricePerKg: price })
+        });
+
+        const newIngredient = await response.json();
+        await updateIngredientList();
+        ingredientForm.reset();
+    });
+
+    addIngredientButton.addEventListener('click', () => {
+        addIngredientInput();
+    });
+
+    recipeForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const recipe = [];
+        document.querySelectorAll('.recipe-item').forEach(item => {
+            const name = item.querySelector('.recipe-select').value;
+            const quantity = parseFloat(item.querySelector('.recipe-quantity').value);
+            recipe.push({ name, quantityKg: quantity });
+        });
+
+        const response = await fetch('/ingredients/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(recipe)
+        });
+
+        const result = await response.json();
+        totalCost.textContent = result.totalCost.toFixed(2);
+    });
+
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('show');
+            tab.classList.add('select-hide');
+        });
+
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.classList.remove('active');
+        });
+
+        document.getElementById(tabId).classList.remove('select-hide');
+        document.getElementById(tabId).classList.add('show');
+
+        document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`).classList.add('active');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        openTab('add');
+    });
+
+    function addIngredientInput() {
+        const div = document.createElement('div');
+        div.classList.add('recipe-item');
+
+        const select = document.createElement('select');
+        select.classList.add('recipe-select');
+        ingredientsData.forEach(ingredient => {
+            const option = document.createElement('option');
+            option.value = ingredient.name;
+            option.textContent = ingredient.name;
+            select.appendChild(option);
+        });
+
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'number';
+        quantityInput.classList.add('recipe-quantity');
+        quantityInput.step = '0.01';
+        quantityInput.placeholder = 'Quantité (kg)';
+        quantityInput.required = true;
+
+        const removeButton = document.createElement('button');
+        removeButton.type = 'button';
+        removeButton.textContent = 'Supprimer';
+        removeButton.onclick = () => {
+            div.remove();
+        };
+
+        div.appendChild(select);
+        div.appendChild(quantityInput);
+        div.appendChild(removeButton);
+        recipeInputs.appendChild(div);
+    }
+
+    async function deleteIngredient(name) {
+        const response = await fetch(`/ingredients/${name}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            updateIngredientList();
+            ingredientDropdown.value = '';
+        } else {
+            console.error('Erreur lors de la suppression de l\'ingrédient');
+        }
+    }
+
+    async function updateIngredientList() {
+        const response = await fetch('/ingredients');
+        const ingredients = await response.json();
+        ingredientsData = ingredients;
+
+        ingredientDropdown.innerHTML = '<option value="" disabled selected>Choisissez un ingrédient...</option>';
+        recipeInputs.innerHTML = '';
+
+        ingredients.forEach(ingredient => {
+            const option = document.createElement('option');
+            option.value = ingredient.name;
+            option.textContent = `${ingredient.name} - ${ingredient.pricePerKg} €/kg`;
+            ingredientDropdown.appendChild(option);
+        });
+
+        addIngredientInput();
+    }
+
+    deleteIngredientButton.addEventListener('click', () => {
+        const selectedOption = ingredientDropdown.value;
+        if (selectedOption) {
+            deleteIngredient(selectedOption);
+        }
+    });
+
+    updateIngredientList();
+</script>
+</body>
+</html>
