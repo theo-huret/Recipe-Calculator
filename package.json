@@ -2,12 +2,9 @@
   "name": "recipe-calculator",
   "version": "1.0.0",
   "main": "index.js",
-  "homepage": "https://theo-huret.github.io/Recipe-Calculator/",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "start": "node app.js"
   },
   "keywords": [],
   "author": "",
