@@ -1,50 +1,138 @@
 [
   {
-    "name": "Farine",
-    "pricePerKg": 1.5
-  },
-  {
-    "name": "Beurre",
-    "pricePerKg": 8
-  },
-  {
-    "name": "Œufs",
-    "pricePerKg": 3.5
-  },
-  {
-    "name": "Lait",
-    "pricePerKg": 0.9
-  },
-  {
-    "name": "Chocolat",
-    "pricePerKg": 15
-  },
-  {
-    "name": "Levure",
-    "pricePerKg": 12
-  },
-  {
-    "name": "Vanille",
-    "pricePerKg": 30
-  },
-  {
-    "name": "Fruits secs",
-    "pricePerKg": 20
+    "name": "Œuf",
+    "pricePerKg": 0.21,
+    "supplier": "Grand Frais"
   },
   {
     "name": "Amandes",
-    "pricePerKg": 25
+    "pricePerKg": 11.24,
+    "supplier": "Grand Frais"
   },
   {
     "name": "Noisettes",
-    "pricePerKg": 22
+    "pricePerKg": 17.96,
+    "supplier": "Grand Frais"
   },
   {
-    "name": "Cannelle",
-    "pricePerKg": 40
+    "name": "Cacahuète blanche",
+    "pricePerKg": 5.29,
+    "supplier": "Grand Frais"
   },
   {
-    "name": "Soja",
-    "pricePerKg": 10
+    "name": "Pécan",
+    "pricePerKg": 25,
+    "supplier": "Grand Frais"
+  },
+  {
+    "name": "Sucre roux",
+    "pricePerKg": 3.05,
+    "supplier": "Grand Frais"
+  },
+  {
+    "name": "Poudre noisettes",
+    "pricePerKg": 15.96,
+    "supplier": "Grand Frais"
+  },
+  {
+    "name": "Sucre",
+    "pricePerKg": 1.41,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Farine",
+    "pricePerKg": 0.74,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Choco lait",
+    "pricePerKg": 7.88,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Feuillantine",
+    "pricePerKg": 14.8,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Crème liquide entière",
+    "pricePerKg": 4.85,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Choco blanc",
+    "pricePerKg": 8.62,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Mascarpone",
+    "pricePerKg": 17.56,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Beurre",
+    "pricePerKg": 9.9,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Levure",
+    "pricePerKg": 4.09,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Choco noir",
+    "pricePerKg": 5,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Cacao amer poudre",
+    "pricePerKg": 7.16,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Lait entier",
+    "pricePerKg": 1.08,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Lait",
+    "pricePerKg": 1,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Maizena",
+    "pricePerKg": 3.5,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Vitpris",
+    "pricePerKg": 23.35,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Fruits rouge",
+    "pricePerKg": 7.54,
+    "supplier": "E.Leclerc"
+  },
+  {
+    "name": "Gélatine",
+    "pricePerKg": 0.08,
+    "supplier": "La boutique à patisser"
+  },
+  {
+    "name": "Gousse vanille",
+    "pricePerKg": 1.67,
+    "supplier": "La boutique à patisser"
+  },
+  {
+    "name": "Glucose",
+    "pricePerKg": 7.8,
+    "supplier": "La boutique à patisser"
+  },
+  {
+    "name": "Bombe velours",
+    "pricePerKg": 7.5,
+    "description": "15€ la bombe mais une demie utilisation pour un entremet",
+    "supplier": "La boutique à patisser"
   }
 ]

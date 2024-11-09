@@ -3,6 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const router = express.Router();
 
+const suppliers = ["Grand Frais", "La boutique à patisser", "E.Leclerc"];
+
+router.get('/suppliers', (req, res) => {
+    res.json(suppliers);
+});
+
 const ingredientsFilePath = path.join(__dirname, '../data/ingredients.json');
 
 function readIngredients() {
@@ -16,13 +22,21 @@ function writeIngredients(data) {
 
 router.get('/', (req, res) => {
     const ingredients = readIngredients();
+
+    ingredients.sort((a, b) => a.name.localeCompare(b.name));
+
     res.json(ingredients);
 });
 
 router.post('/', (req, res) => {
     const ingredients = readIngredients();
-    const newIngredient = req.body;
+    const { name, pricePerKg, description = "", supplier } = req.body;
 
+    if (!supplier) {
+        return res.status(400).json({ error: "Supplier is required" });
+    }
+
+    const newIngredient = { name, pricePerKg, description, supplier };
     ingredients.push(newIngredient);
     writeIngredients(ingredients);
 

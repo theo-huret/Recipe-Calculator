@@ -7,22 +7,29 @@
     <title>Calculateur de coût de recette</title>
     <script defer src="script.js"></script>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
         <h1>Calculateur de coût de recette</h1>
 
         <div class="tabs">
+            <button class="tab-button" onclick="openTab('calculate')">Calculer le coût</button>
             <button class="tab-button" onclick="openTab('add')">Ajouter un ingrédient</button>
             <button class="tab-button" onclick="openTab('search')">Supprimer un ingrédient</button>
-            <button class="tab-button" onclick="openTab('calculate')">Calculer le coût</button>
         </div>
 
-        <div id="add" class="tab-content">
+        <div id="add" class="tab-content select-hide">
             <h2>Ajouter un ingrédient</h2>
             <form id="ingredientForm">
                 <input type="text" id="ingredientName" placeholder="Nom de l'ingrédient" required>
                 <input type="number" id="ingredientPrice" placeholder="Prix par kilo (€)" step="0.01" required>
+                <input type="text" id="ingredientDescription" placeholder="Description (optionnel)">
+
+                <select id="supplierDropdown" required>
+                    <option value="" disabled selected>Choisissez un fournisseur...</option>
+                </select>
+
                 <button type="submit">Ajouter Ingrédient</button>
             </form>
         </div>
@@ -35,7 +42,7 @@
             <button id="deleteIngredientButton">Supprimer Ingrédient Sélectionné</button>
         </div>
 
-        <div id="calculate" class="tab-content select-hide">
+        <div id="calculate" class="tab-content">
             <h2>Calculer le coût de la recette</h2>
             <form id="recipeForm">
                 <div id="recipeInputs"></div>
@@ -56,20 +63,40 @@
     const addIngredientButton = document.getElementById('addIngredientButton');
     let ingredientsData = [];
 
+    document.addEventListener('DOMContentLoaded', async () => {
+        openTab('add');
+        await populateSuppliers();
+        await updateIngredientList();
+    });
+
+    async function populateSuppliers() {
+        const response = await fetch('/ingredients/suppliers');
+        const suppliers = await response.json();
+        const supplierDropdown = document.getElementById('supplierDropdown');
+
+        suppliers.forEach(supplier => {
+            const option = document.createElement('option');
+            option.value = supplier;
+            option.textContent = supplier;
+            supplierDropdown.appendChild(option);
+        });
+    }
+
     ingredientForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const name = document.getElementById('ingredientName').value;
         const price = parseFloat(document.getElementById('ingredientPrice').value);
+        const description = document.getElementById('ingredientDescription').value;
+        const supplier = document.getElementById('supplierDropdown').value;
 
         const response = await fetch('/ingredients', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, pricePerKg: price })
+            body: JSON.stringify({ name, pricePerKg: price, description, supplier })
         });
 
-        const newIngredient = await response.json();
         await updateIngredientList();
         ingredientForm.reset();
     });
@@ -116,7 +143,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        openTab('add');
+        openTab('calculate');
     });
 
     function addIngredientInput() {
@@ -128,9 +155,13 @@
         ingredientsData.forEach(ingredient => {
             const option = document.createElement('option');
             option.value = ingredient.name;
-            option.textContent = ingredient.name;
+            option.textContent = `${ingredient.name} (${ingredient.supplier})    - ${ingredient.pricePerKg} €/kg`;
             select.appendChild(option);
         });
+
+        const quantityWrapper = document.createElement('div');
+        quantityWrapper.style.display = 'flex';
+        quantityWrapper.style.alignItems = 'center';
 
         const quantityInput = document.createElement('input');
         quantityInput.type = 'number';
@@ -138,19 +169,41 @@
         quantityInput.step = '0.01';
         quantityInput.placeholder = 'Quantité (kg)';
         quantityInput.required = true;
+        quantityInput.style.flex = '2';
 
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
-        removeButton.textContent = 'Supprimer';
-        removeButton.onclick = () => {
-            div.remove();
-        };
+        removeButton.classList.add('remove-button');
+        removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>';  // Icône de poubelle
+        removeButton.style.marginLeft = '10px';
+        removeButton.onclick = () => div.remove();
+
+        const descriptionLabel = document.createElement('small');
+        descriptionLabel.classList.add('ingredient-description');
+        descriptionLabel.style.display = 'none';
+
+        select.addEventListener('change', () => {
+            const selectedIngredient = ingredientsData.find(ing => ing.name === select.value);
+            if (selectedIngredient && selectedIngredient.description) {
+                descriptionLabel.textContent = `* ${selectedIngredient.description}`;
+                descriptionLabel.style.display = 'block';
+                descriptionLabel.style.padding = '10px';
+            } else {
+                descriptionLabel.style.display = 'none';
+            }
+        });
 
         div.appendChild(select);
-        div.appendChild(quantityInput);
-        div.appendChild(removeButton);
+        div.appendChild(descriptionLabel);
+        quantityWrapper.appendChild(quantityInput);
+        quantityWrapper.appendChild(removeButton);  // Ajout du bouton de suppression avec l'icône
+        div.appendChild(quantityWrapper); // Ajout du wrapper à la div
         recipeInputs.appendChild(div);
     }
+
+
+
+
 
     async function deleteIngredient(name) {
         const response = await fetch(`/ingredients/${name}`, {
@@ -179,9 +232,10 @@
         ingredients.forEach(ingredient => {
             const option = document.createElement('option');
             option.value = ingredient.name;
-            option.textContent = `${ingredient.name} - ${ingredient.pricePerKg} €/kg`;
+            option.textContent = `${ingredient.name} (${ingredient.supplier}) - ${ingredient.pricePerKg} €/kg`;
             ingredientDropdown.appendChild(option);
         });
+
 
         addIngredientInput();
     }

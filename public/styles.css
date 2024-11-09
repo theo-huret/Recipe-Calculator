@@ -9,6 +9,14 @@ body {
     min-height: 100vh;
 }
 
+.ingredient-description {
+    display: block;
+    font-style: italic;
+    color: #666;
+    font-size: 14px;
+    margin-top: -10px;
+}
+
 .container {
     background-color: #ffffff;
     padding: 30px;
@@ -114,27 +122,56 @@ h1, h2, h3 {
     flex-direction: column;
 }
 
+.recipe-item .recipe-select,
+.recipe-item .recipe-quantity {
+    width: calc(100% - 30px);
+    margin-bottom: 10px;
+}
+
 .recipe-item {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     margin-bottom: 15px;
+}
+
+.recipe-item .ingredient-description {
+    font-size: 14px;
+    color: #666;
+    font-style: italic;
 }
 
 .recipe-item select,
 .recipe-item input {
-    flex-grow: 1;
-    margin-right: 15px;
+    width: calc(100% - 30px);
+    margin-bottom: 10px;
 }
 
-.recipe-item button {
+.recipe-item button.remove-button {
     background-color: #f44336;
-    padding: 10px 15px;
-    font-size: 16px;
+    color: white;
+    font-size: 20px;
+    padding: 10px;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.3s ease;
 }
 
-.recipe-item button:hover {
+.recipe-item button.remove-button:hover {
     background-color: #e53935;
 }
+
+.recipe-item button.remove-button i {
+    font-size: 15px;
+}
+
+
 
 @media (max-width: 768px) {
     .container {
