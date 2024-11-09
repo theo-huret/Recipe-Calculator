@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <h1>Calculateur de coût de recette</h1>
-
+        <div id="messageBox" class="message-box"></div>
         <div class="tabs">
             <button class="tab-button" onclick="openTab('calculate')">Calculer le coût</button>
             <button class="tab-button" onclick="openTab('add')">Ajouter un ingrédient</button>
@@ -131,10 +131,27 @@
         await updateIngredientList();
     });
 
-    deleteIngredientButton.addEventListener('click', () => {
+    deleteIngredientButton.addEventListener('click', async () => {
         const selectedOption = ingredientDropdown.value;
         if (selectedOption) {
-            deleteIngredient(selectedOption);
+            try {
+                const response = await fetch(`/ingredients/${selectedOption}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    await updateIngredientList();
+                    ingredientDropdown.value = '';
+                    showMessage('Ingrédient supprimé avec succès', 'success');
+                } else {
+                    showMessage('Erreur lors de la suppression de l\'ingrédient', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur de connexion, veuillez réessayer', 'error');
+            }
         }
     });
 
@@ -145,17 +162,27 @@
         const description = document.getElementById('ingredientDescription').value;
         const supplier = document.getElementById('supplierDropdown').value;
 
-        const response = await fetch('/ingredients', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ name, pricePerKg: price, description, supplier })
-        });
+        try {
+            const response = await fetch('/ingredients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, pricePerKg: price, description, supplier })
+            });
 
-        await updateIngredientList();
-        ingredientForm.reset();
+            if (response.ok) {
+                await updateIngredientList();
+                ingredientForm.reset();
+                showMessage('Ingrédient ajouté avec succès', 'success');
+            } else {
+                showMessage('Erreur lors de l\'ajout de l\'ingrédient', 'error');
+            }
+        } catch (error) {
+            showMessage('Erreur de connexion, veuillez réessayer', 'error');
+        }
     });
+
 
     addIngredientButton.addEventListener('click', () => {
         addIngredientInput();
@@ -314,6 +341,22 @@
         recipeInputs.appendChild(div);
 
         updateCostDisplay();
+    }
+
+    function showMessage(message, type = 'success') {
+        const messageBox = document.getElementById('messageBox');
+        messageBox.textContent = message;
+        messageBox.className = 'message-box ' + type;
+        messageBox.style.display = 'block';
+
+        setTimeout(() => {
+            messageBox.classList.add('fade-out');
+        }, 3000);
+
+        setTimeout(() => {
+            messageBox.style.display = 'none';
+            messageBox.classList.remove('fade-out');
+        }, 4000);
     }
 
     async function deleteIngredient(name) {

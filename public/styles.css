@@ -284,3 +284,51 @@ h1, h2, h3 {
 #deleteIngredientButton:hover {
     background-color: #ec407a;
 }
+
+.message-box {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #f06292;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 16px;
+    max-width: 90%;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s ease-out forwards;
+}
+
+@keyframes slideIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.message-box.error {
+    background-color: #f44336;
+}
+
+.message-box.success {
+    background-color: #f06292;
+}
+
+.message-box.fade-out {
+    animation: fadeOut 1s ease-out forwards;
+}
+
