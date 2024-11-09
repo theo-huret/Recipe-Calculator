@@ -1,399 +1,565 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculateur de coût de recette</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <h1>Calculateur de coût de recette</h1>
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Calculateur de coût de recette</title>
+        <link rel="stylesheet" href="styles.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    </head>
+    <body>
         <div id="messageBox" class="message-box"></div>
-        <div class="tabs">
-            <button class="tab-button" onclick="openTab('calculate')">Calculer le coût</button>
-            <button class="tab-button" onclick="openTab('add')">Ajouter un ingrédient</button>
-            <button class="tab-button" onclick="openTab('search')">Supprimer un ingrédient</button>
-        </div>
+        <div class="container">
+            <h1>Calculateur de coût de recette</h1>
+            <div class="tabs">
+                <button class="tab-button" onclick="openTab('calculate')">Calculer le coût</button>
+                <button class="tab-button" onclick="openTab('add')">Ajouter un ingrédient</button>
+                <button class="tab-button" onclick="openTab('search')">Supprimer un ingrédient</button>
+            </div>
 
-        <div id="add" class="tab-content select-hide">
-            <h2>Ajouter un ingrédient</h2>
-            <form id="ingredientForm">
-                <input type="text" id="ingredientName" placeholder="Nom de l'ingrédient" required>
-                <input type="number" id="ingredientPrice" placeholder="Prix par kilo (€)" step="0.01" required>
-                <input type="text" id="ingredientDescription" placeholder="Description (optionnel)">
+            <div id="add" class="tab-content select-hide">
+                <h2>Ajouter un ingrédient</h2>
+                <form id="ingredientForm">
+                    <input type="text" id="ingredientName" placeholder="Nom de l'ingrédient" required>
+                    <input type="number" id="ingredientPrice" placeholder="Prix par kilo (€)" step="0.01" required>
+                    <input type="text" id="ingredientDescription" placeholder="Description (optionnel)">
 
-                <select id="supplierDropdown" required>
-                    <option value="" disabled selected>Choisissez un fournisseur...</option>
+                    <select id="supplierDropdown" required>
+                        <option value="" disabled selected>Choisissez un fournisseur...</option>
+                    </select>
+
+                    <button type="submit">Ajouter Ingrédient</button>
+                </form>
+            </div>
+
+            <div id="search" class="tab-content select-hide">
+                <h2>Rechercher et supprimer un ingrédient</h2>
+                <select id="ingredientDropdown">
+                    <option value="" disabled selected>Choisissez un ingrédient...</option>
                 </select>
+                <button id="deleteIngredientButton">Supprimer Ingrédient Sélectionné</button>
+            </div>
 
-                <button type="submit">Ajouter Ingrédient</button>
-            </form>
-        </div>
+            <div id="calculate" class="tab-content">
+                <h2>Calculer le coût de la recette</h2>
 
-        <div id="search" class="tab-content select-hide">
-            <h2>Rechercher et supprimer un ingrédient</h2>
-            <select id="ingredientDropdown">
-                <option value="" disabled selected>Choisissez un ingrédient...</option>
-            </select>
-            <button id="deleteIngredientButton">Supprimer Ingrédient Sélectionné</button>
-        </div>
+                <div id="loadRecipeModal" class="modal">
+                    <div class="modal-content">
+                        <span class="close-btn" id="closeLoadModalBtn">&times;</span>
+                        <h2>Charger une Recette</h2>
+                        <select id="savedRecipesDropdown">
+                            <option value="" disabled selected>Choisissez une recette...</option>
+                        </select>
+                        <button id="loadSelectedRecipeButton">Charger la Recette</button>
+                    </div>
+                </div>
 
-        <div id="calculate" class="tab-content">
-            <h2>Calculer le coût de la recette</h2>
-            <form id="recipeForm">
-                <div id="recipeInputs"></div>
-                <button type="button" id="addIngredientButton">Ajouter un ingrédient</button>
-                <button type="button" id="settingsButton">Paramètres</button>
-            </form>
+                <form id="recipeForm">
+                    <div id="recipeInputs"></div>
+                    <button type="button" id="addIngredientButton">Ajouter un ingrédient</button>
+                    <button type="button" id="settingsButton">Paramètres</button>
+                    <button type="button" id="saveRecipeButton">Enregistrer la Recette</button>
+                    <button type="button" id="loadRecipeButton">Charger une Recette</button>
+                </form>
 
-            <div id="infoDisplay">
-                <h3>Coût total de la recette : <span id="totalCost">0</span> €</h3>
-                <h3>Prix de vente (avec marge) : <span id="salePrice">0</span> €</h3>
+                <div id="infoDisplay">
+                    <h3>Coût total de la recette : <span id="totalCost">0</span> €</h3>
+                    <h3>Prix de vente (avec marge) : <span id="salePrice">0</span> €</h3>
+                </div>
+            </div>
+
+            <div id="settingsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-btn" id="closeModalBtn">&times;</span>
+                    <h2>Paramètres</h2>
+                    <label for="electricityCost">Coût de l'électricité (par heure, €) :</label>
+                    <input type="number" id="electricityCostModal" value="0.12" step="0.01" placeholder="Coût de l'électricité" required>
+
+                    <label for="hoursSpent">Nombre d'heures passées :</label>
+                    <input type="number" id="hoursSpentModal" value="1" step="0.1" placeholder="Heures passées" required>
+
+                    <label for="profitMargin">Marge souhaitée (%) :</label>
+                    <input type="number" id="profitMarginModal" value="30" step="1" placeholder="Marge (%)" required>
+
+                    <button id="saveSettingsBtn">Enregistrer</button>
+                </div>
             </div>
         </div>
 
-        <div id="settingsModal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn" id="closeModalBtn">&times;</span>
-                <h2>Paramètres</h2>
-                <label for="electricityCost">Coût de l'électricité (par heure, €) :</label>
-                <input type="number" id="electricityCostModal" value="0.12" step="0.01" placeholder="Coût de l'électricité" required>
+    <script>
+        const ingredientForm = document.getElementById('ingredientForm');
+        const ingredientDropdown = document.getElementById('ingredientDropdown');
+        const deleteIngredientButton = document.getElementById('deleteIngredientButton');
+        const recipeForm = document.getElementById('recipeForm');
+        const recipeInputs = document.getElementById('recipeInputs');
+        const totalCost = document.getElementById('totalCost');
+        const salePrice = document.getElementById('salePrice');
+        const addIngredientButton = document.getElementById('addIngredientButton');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsModal = document.getElementById('settingsModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
 
-                <label for="hoursSpent">Nombre d'heures passées :</label>
-                <input type="number" id="hoursSpentModal" value="1" step="0.1" placeholder="Heures passées" required>
+        const electricityCostInputModal = document.getElementById('electricityCostModal');
+        const hoursSpentInputModal = document.getElementById('hoursSpentModal');
+        const profitMarginInputModal = document.getElementById('profitMarginModal');
 
-                <label for="profitMargin">Marge souhaitée (%) :</label>
-                <input type="number" id="profitMarginModal" value="30" step="1" placeholder="Marge (%)" required>
+        const saveRecipeButton = document.getElementById('saveRecipeButton');
+        const loadRecipeButton = document.getElementById('loadRecipeButton');
+        const loadRecipeModal = document.getElementById('loadRecipeModal');
+        const closeLoadModalBtn = document.getElementById('closeLoadModalBtn');
+        const savedRecipesDropdown = document.getElementById('savedRecipesDropdown');
+        const loadSelectedRecipeButton = document.getElementById('loadSelectedRecipeButton');
 
-                <button id="saveSettingsBtn">Enregistrer</button>
-            </div>
-        </div>
-    </div>
+        let ingredientsData = [];
 
-<script>
-    const ingredientForm = document.getElementById('ingredientForm');
-    const ingredientDropdown = document.getElementById('ingredientDropdown');
-    const deleteIngredientButton = document.getElementById('deleteIngredientButton');
-    const recipeForm = document.getElementById('recipeForm');
-    const recipeInputs = document.getElementById('recipeInputs');
-    const totalCost = document.getElementById('totalCost');
-    const salePrice = document.getElementById('salePrice');
-    const addIngredientButton = document.getElementById('addIngredientButton');
-    const settingsButton = document.getElementById('settingsButton');
-    const settingsModal = document.getElementById('settingsModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        let electricityCost = 0.12;
+        let hoursSpent = 1;
+        let profitMargin = 30;
 
-    const electricityCostInputModal = document.getElementById('electricityCostModal');
-    const hoursSpentInputModal = document.getElementById('hoursSpentModal');
-    const profitMarginInputModal = document.getElementById('profitMarginModal');
-    let ingredientsData = [];
+        settingsButton.addEventListener('click', () => {
+            electricityCostInputModal.value = electricityCost;
+            hoursSpentInputModal.value = hoursSpent;
+            profitMarginInputModal.value = profitMargin;
 
-    let electricityCost = 0.12;
-    let hoursSpent = 1;
-    let profitMargin = 30;
+            settingsModal.style.display = 'flex';
+            setTimeout(() => {
+                settingsModal.style.opacity = '1';
+            }, 10);
+        });
 
-    settingsButton.addEventListener('click', () => {
-        electricityCostInputModal.value = electricityCost;
-        hoursSpentInputModal.value = hoursSpent;
-        profitMarginInputModal.value = profitMargin;
+        loadRecipeButton.addEventListener('click', async () => {
+            await populateSavedRecipes();
+            loadRecipeModal.style.display = 'flex';
+            setTimeout(() => { loadRecipeModal.style.opacity = '1'; }, 10);
+        });
 
-        settingsModal.style.display = 'flex';
-        setTimeout(() => {
-            settingsModal.style.opacity = '1';
-        }, 10);
-    });
+        closeLoadModalBtn.addEventListener('click', () => {
+            loadRecipeModal.style.opacity = '0';
+            setTimeout(() => { loadRecipeModal.style.display = 'none'; }, 500);
+        });
 
+        saveRecipeButton.addEventListener('click', async () => {
+            const recipeName = prompt("Nom de la recette (unique):");
+            if (!recipeName) return;
 
-    closeModalBtn.addEventListener('click', () => {
-        settingsModal.style.opacity = '0';
-        setTimeout(() => {
-            settingsModal.style.display = 'none';
-        }, 500);
-    });
+            const recipe = {
+                name: recipeName,
+                ingredients: [],
+                electricityCost,
+                hoursSpent,
+                profitMargin,
+            };
 
-    saveSettingsBtn.addEventListener('click', () => {
-        electricityCost = parseFloat(electricityCostInputModal.value);
-        hoursSpent = parseFloat(hoursSpentInputModal.value);
-        profitMargin = parseFloat(profitMarginInputModal.value);
+            document.querySelectorAll('.recipe-item').forEach(item => {
+                const name = item.querySelector('.recipe-select').value;
+                const quantity = parseFloat(item.querySelector('.recipe-quantity').value);
+                if (name && !isNaN(quantity)) {
+                    recipe.ingredients.push({ name, quantityKg: quantity });
+                }
+            });
 
-        settingsModal.style.display = 'none';
-        updateCostDisplay();
-    });
-
-
-    document.addEventListener('DOMContentLoaded', async () => {
-        openTab('add');
-        await populateSuppliers();
-        await updateIngredientList();
-    });
-
-    deleteIngredientButton.addEventListener('click', async () => {
-        const selectedOption = ingredientDropdown.value;
-        if (selectedOption) {
             try {
-                const response = await fetch(`/ingredients/${selectedOption}`, {
-                    method: 'DELETE',
+                const response = await fetch('/recettes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(recipe)
+                });
+
+                if (response.ok) {
+                    showMessage('Recette enregistrée avec succès', 'success');
+                } else {
+                    showMessage("Erreur lors de l'enregistrement de la recette", 'error');
+                }
+            } catch (error) {
+                showMessage("Erreur de connexion, veuillez réessayer", 'error');
+            }
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            settingsModal.style.opacity = '0';
+            setTimeout(() => {
+                settingsModal.style.display = 'none';
+            }, 500);
+        });
+
+        saveSettingsBtn.addEventListener('click', () => {
+            electricityCost = parseFloat(electricityCostInputModal.value);
+            hoursSpent = parseFloat(hoursSpentInputModal.value);
+            profitMargin = parseFloat(profitMarginInputModal.value);
+
+            settingsModal.style.display = 'none';
+            updateCostDisplay();
+        });
+
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            openTab('add');
+            await populateSuppliers();
+            await updateIngredientList();
+        });
+
+        loadSelectedRecipeButton.addEventListener('click', async () => {
+            const recipeName = savedRecipesDropdown.value;
+            if (!recipeName) return;
+
+            try {
+                const response = await fetch(`/recettes/${recipeName}`);
+                if (response.ok) {
+                    const recipe = await response.json();
+                    loadRecipe(recipe);
+                    loadRecipeModal.style.display = 'none';
+                    showMessage('Recette chargée avec succès', 'success');
+                    updateLoadButtonState('loaded', recipeName); // Mise à jour du bouton après avoir chargé la recette
+                } else {
+                    showMessage("Erreur lors du chargement de la recette", 'error');
+                }
+            } catch (error) {
+                showMessage("Erreur de connexion, veuillez réessayer", 'error');
+            }
+        });
+
+        deleteIngredientButton.addEventListener('click', async () => {
+            const selectedOption = ingredientDropdown.value;
+            if (selectedOption) {
+                try {
+                    const response = await fetch(`/ingredients/${selectedOption}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        await updateIngredientList();
+                        ingredientDropdown.value = '';
+                        showMessage('Ingrédient supprimé avec succès', 'success');
+                    } else {
+                        showMessage('Erreur lors de la suppression de l\'ingrédient', 'error');
+                    }
+                } catch (error) {
+                    showMessage('Erreur de connexion, veuillez réessayer', 'error');
+                }
+            }
+        });
+
+        ingredientForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const name = document.getElementById('ingredientName').value;
+            const price = parseFloat(document.getElementById('ingredientPrice').value);
+            const description = document.getElementById('ingredientDescription').value;
+            const supplier = document.getElementById('supplierDropdown').value;
+
+            try {
+                const response = await fetch('/ingredients', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
-                    }
+                    },
+                    body: JSON.stringify({ name, pricePerKg: price, description, supplier })
                 });
 
                 if (response.ok) {
                     await updateIngredientList();
-                    ingredientDropdown.value = '';
-                    showMessage('Ingrédient supprimé avec succès', 'success');
+                    ingredientForm.reset();
+                    showMessage('Ingrédient ajouté avec succès', 'success');
                 } else {
-                    showMessage('Erreur lors de la suppression de l\'ingrédient', 'error');
+                    showMessage('Erreur lors de l\'ajout de l\'ingrédient', 'error');
+                }
+            } catch (error) {
+                showMessage('Erreur de connexion, veuillez réessayer', 'error');
+            }
+        });
+
+
+        addIngredientButton.addEventListener('click', () => {
+            addIngredientInput();
+        });
+
+        recipeForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const recipe = [];
+            document.querySelectorAll('.recipe-item').forEach(item => {
+                const name = item.querySelector('.recipe-select').value;
+                const quantity = parseFloat(item.querySelector('.recipe-quantity').value);
+                recipe.push({ name, quantityKg: quantity });
+            });
+
+            const response = await fetch('/ingredients/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(recipe)
+            });
+
+            const result = await response.json();
+            const totalIngredientCost = result.totalCost;
+
+            const electricityCostTotal = electricityCost * hoursSpent;
+
+            const totalCostValue = totalIngredientCost + electricityCostTotal;
+
+            const salePriceValue = totalCostValue * (1 + profitMargin / 100);
+
+            totalCost.textContent = totalCostValue.toFixed(2);
+            salePrice.textContent = salePriceValue.toFixed(2);
+        });
+
+        async function populateSuppliers() {
+            const response = await fetch('/ingredients/suppliers');
+            const suppliers = await response.json();
+            const supplierDropdown = document.getElementById('supplierDropdown');
+
+            suppliers.forEach(supplier => {
+                const option = document.createElement('option');
+                option.value = supplier;
+                option.textContent = supplier;
+                supplierDropdown.appendChild(option);
+            });
+        }
+
+        function updateCostDisplay() {
+            let totalIngredientCost = 0;
+
+            document.querySelectorAll('.recipe-item').forEach(item => {
+                const select = item.querySelector('.recipe-select');
+                const quantityInput = item.querySelector('.recipe-quantity');
+
+                const selectedIngredient = ingredientsData.find(ingredient => ingredient.name === select.value);
+                const quantity = parseFloat(quantityInput.value);
+
+                if (selectedIngredient && !isNaN(quantity)) {
+                    totalIngredientCost += selectedIngredient.pricePerKg * quantity;
+                }
+            });
+
+            const electricityCostTotal = electricityCost * hoursSpent;
+
+            const totalCostValue = totalIngredientCost + electricityCostTotal;
+
+            const salePriceValue = totalCostValue * (1 + profitMargin / 100);
+
+            totalCost.textContent = totalCostValue.toFixed(2);
+            salePrice.textContent = salePriceValue.toFixed(2);
+        }
+
+
+
+        function openTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('show');
+                tab.classList.add('select-hide');
+            });
+
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            document.getElementById(tabId).classList.remove('select-hide');
+            document.getElementById(tabId).classList.add('show');
+
+            document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`).classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            openTab('calculate');
+            updateCostDisplay();
+        });
+
+        function addIngredientInput(name = '', quantityKg = 0) {
+            const div = document.createElement('div');
+            div.classList.add('recipe-item');
+
+            const select = document.createElement('select');
+            select.classList.add('recipe-select');
+
+            ingredientsData.forEach(ingredient => {
+                const option = document.createElement('option');
+                option.value = ingredient.name;
+                option.textContent = `${ingredient.name} (${ingredient.supplier}) - ${ingredient.pricePerKg} €/kg`;
+                select.appendChild(option);
+            });
+
+            if (name) {
+                select.value = name;
+            }
+
+            const quantityWrapper = document.createElement('div');
+            quantityWrapper.style.display = 'flex';
+            quantityWrapper.style.alignItems = 'center';
+
+            const quantityInput = document.createElement('input');
+            quantityInput.type = 'number';
+            quantityInput.classList.add('recipe-quantity');
+            quantityInput.step = '0.01';
+            quantityInput.placeholder = 'Quantité (kg)';
+            quantityInput.required = true;
+            quantityInput.style.flex = '2';
+
+            if (quantityKg > 0) {
+                quantityInput.value = quantityKg;
+            }
+
+            quantityInput.addEventListener('input', updateCostDisplay);
+            select.addEventListener('change', updateCostDisplay);
+
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.classList.add('remove-button');
+            removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
+            removeButton.style.marginLeft = '10px';
+            removeButton.onclick = () => {
+                div.remove();
+                updateCostDisplay();
+            };
+
+            const descriptionLabel = document.createElement('small');
+            descriptionLabel.classList.add('ingredient-description');
+            descriptionLabel.style.display = 'none';
+
+            select.addEventListener('change', () => {
+                const selectedIngredient = ingredientsData.find(ing => ing.name === select.value);
+                if (selectedIngredient && selectedIngredient.description) {
+                    descriptionLabel.textContent = `* ${selectedIngredient.description}`;
+                    descriptionLabel.style.display = 'block';
+                    descriptionLabel.style.padding = '10px';
+                } else {
+                    descriptionLabel.style.display = 'none';
+                }
+            });
+
+            div.appendChild(select);
+            div.appendChild(descriptionLabel);
+            quantityWrapper.appendChild(quantityInput);
+            quantityWrapper.appendChild(removeButton);
+            div.appendChild(quantityWrapper);
+            recipeInputs.appendChild(div);
+
+            updateCostDisplay();
+        }
+
+
+        function showMessage(message, type = 'success') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = 'message-box ' + type;
+            messageBox.style.display = 'block';
+
+            setTimeout(() => {
+                messageBox.classList.add('fade-out');
+            }, 3000);
+
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+                messageBox.classList.remove('fade-out');
+            }, 4000);
+        }
+
+        async function deleteIngredient(name) {
+            const response = await fetch(`/ingredients/${name}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                updateIngredientList();
+                ingredientDropdown.value = '';
+            } else {
+                console.error('Erreur lors de la suppression de l\'ingrédient');
+            }
+        }
+
+        async function updateIngredientList() {
+            const response = await fetch('/ingredients');
+            const ingredients = await response.json();
+            ingredientsData = ingredients;
+
+            ingredientDropdown.innerHTML = '<option value="" disabled selected>Choisissez un ingrédient...</option>';
+            recipeInputs.innerHTML = '';
+
+            ingredients.forEach(ingredient => {
+                const option = document.createElement('option');
+                option.value = ingredient.name;
+                option.textContent = `${ingredient.name} (${ingredient.supplier}) - ${ingredient.pricePerKg} €/kg`;
+                ingredientDropdown.appendChild(option);
+            });
+
+
+            addIngredientInput();
+        }
+
+        async function populateSavedRecipes() {
+            const response = await fetch('/recettes');
+            const recipes = await response.json();
+
+            savedRecipesDropdown.innerHTML = '<option value="" disabled selected>Choisissez une recette...</option>';
+            recipes.forEach(recipe => {
+                const option = document.createElement('option');
+                option.value = recipe.name;
+                option.textContent = recipe.name;
+                savedRecipesDropdown.appendChild(option);
+            });
+
+            updateLoadButtonState('');
+        }
+
+        async function updateLoadButtonState(state, recipeName = '') {
+            const loadRecipeButton = document.getElementById('loadRecipeButton');
+
+            if (state === 'loaded') {
+                loadRecipeButton.textContent = 'Supprimer la recette';
+                loadRecipeButton.onclick = async () => {
+                    await deleteRecipe(recipeName);
+                    loadRecipeButton.textContent = 'Charger une recette';
+                };
+            } else {
+                loadRecipeButton.textContent = 'Charger une recette';
+                loadRecipeButton.onclick = async () => {
+                    await populateSavedRecipes();
+                    loadRecipeModal.style.display = 'flex';
+                    setTimeout(() => { loadRecipeModal.style.opacity = '1'; }, 10);
+                };
+            }
+        }
+
+        async function deleteRecipe(recipeName) {
+            try {
+                const response = await fetch(`/recettes/${recipeName}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    showMessage('Recette supprimée avec succès', 'success');
+                    await populateSavedRecipes();
+                    updateLoadButtonState('');
+                } else {
+                    showMessage('Erreur lors de la suppression de la recette', 'error');
                 }
             } catch (error) {
                 showMessage('Erreur de connexion, veuillez réessayer', 'error');
             }
         }
-    });
 
-    ingredientForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const name = document.getElementById('ingredientName').value;
-        const price = parseFloat(document.getElementById('ingredientPrice').value);
-        const description = document.getElementById('ingredientDescription').value;
-        const supplier = document.getElementById('supplierDropdown').value;
-
-        try {
-            const response = await fetch('/ingredients', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ name, pricePerKg: price, description, supplier })
+        function loadRecipe(recipe) {
+            recipeInputs.innerHTML = '';
+            recipe.ingredients.forEach(ingredient => {
+                addIngredientInput(ingredient.name, ingredient.quantityKg);
             });
 
-            if (response.ok) {
-                await updateIngredientList();
-                ingredientForm.reset();
-                showMessage('Ingrédient ajouté avec succès', 'success');
-            } else {
-                showMessage('Erreur lors de l\'ajout de l\'ingrédient', 'error');
-            }
-        } catch (error) {
-            showMessage('Erreur de connexion, veuillez réessayer', 'error');
+            electricityCost = recipe.electricityCost;
+            hoursSpent = recipe.hoursSpent;
+            profitMargin = recipe.profitMargin;
+
+            updateCostDisplay();
         }
-    });
 
-
-    addIngredientButton.addEventListener('click', () => {
-        addIngredientInput();
-    });
-
-    recipeForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-
-        const recipe = [];
-        document.querySelectorAll('.recipe-item').forEach(item => {
-            const name = item.querySelector('.recipe-select').value;
-            const quantity = parseFloat(item.querySelector('.recipe-quantity').value);
-            recipe.push({ name, quantityKg: quantity });
-        });
-
-        const response = await fetch('/ingredients/calculate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(recipe)
-        });
-
-        const result = await response.json();
-        const totalIngredientCost = result.totalCost;
-
-        const electricityCostTotal = electricityCost * hoursSpent;
-
-        const totalCostValue = totalIngredientCost + electricityCostTotal;
-
-        const salePriceValue = totalCostValue * (1 + profitMargin / 100);
-
-        totalCost.textContent = totalCostValue.toFixed(2);
-        salePrice.textContent = salePriceValue.toFixed(2);
-    });
-
-    async function populateSuppliers() {
-        const response = await fetch('/ingredients/suppliers');
-        const suppliers = await response.json();
-        const supplierDropdown = document.getElementById('supplierDropdown');
-
-        suppliers.forEach(supplier => {
-            const option = document.createElement('option');
-            option.value = supplier;
-            option.textContent = supplier;
-            supplierDropdown.appendChild(option);
-        });
-    }
-
-    function updateCostDisplay() {
-        let totalIngredientCost = 0;
-
-        document.querySelectorAll('.recipe-item').forEach(item => {
-            const select = item.querySelector('.recipe-select');
-            const quantityInput = item.querySelector('.recipe-quantity');
-
-            const selectedIngredient = ingredientsData.find(ingredient => ingredient.name === select.value);
-            const quantity = parseFloat(quantityInput.value);
-
-            if (selectedIngredient && !isNaN(quantity)) {
-                totalIngredientCost += selectedIngredient.pricePerKg * quantity;
-            }
-        });
-
-        const electricityCostTotal = electricityCost * hoursSpent;
-
-        const totalCostValue = totalIngredientCost + electricityCostTotal;
-
-        const salePriceValue = totalCostValue * (1 + profitMargin / 100);
-
-        totalCost.textContent = totalCostValue.toFixed(2);
-        salePrice.textContent = salePriceValue.toFixed(2);
-    }
-
-
-
-    function openTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('show');
-            tab.classList.add('select-hide');
-        });
-
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.classList.remove('active');
-        });
-
-        document.getElementById(tabId).classList.remove('select-hide');
-        document.getElementById(tabId).classList.add('show');
-
-        document.querySelector(`.tab-button[onclick="openTab('${tabId}')"]`).classList.add('active');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        openTab('calculate');
-        updateCostDisplay();
-    });
-
-    function addIngredientInput() {
-        const div = document.createElement('div');
-        div.classList.add('recipe-item');
-
-        const select = document.createElement('select');
-        select.classList.add('recipe-select');
-        ingredientsData.forEach(ingredient => {
-            const option = document.createElement('option');
-            option.value = ingredient.name;
-            option.textContent = `${ingredient.name} (${ingredient.supplier})    - ${ingredient.pricePerKg} €/kg`;
-            select.appendChild(option);
-        });
-
-        const quantityWrapper = document.createElement('div');
-        quantityWrapper.style.display = 'flex';
-        quantityWrapper.style.alignItems = 'center';
-
-        const quantityInput = document.createElement('input');
-        quantityInput.type = 'number';
-        quantityInput.classList.add('recipe-quantity');
-        quantityInput.step = '0.01';
-        quantityInput.placeholder = 'Quantité (kg)';
-        quantityInput.required = true;
-        quantityInput.style.flex = '2';
-
-        quantityInput.addEventListener('input', updateCostDisplay);
-        select.addEventListener('change', updateCostDisplay);
-
-        const removeButton = document.createElement('button');
-        removeButton.type = 'button';
-        removeButton.classList.add('remove-button');
-        removeButton.innerHTML = '<i class="fas fa-trash-alt"></i>';
-        removeButton.style.marginLeft = '10px';
-        removeButton.onclick = () => {
-            div.remove();
-            updateCostDisplay();  // Recalculer après suppression
-        };
-
-        const descriptionLabel = document.createElement('small');
-        descriptionLabel.classList.add('ingredient-description');
-        descriptionLabel.style.display = 'none';
-
-        select.addEventListener('change', () => {
-            const selectedIngredient = ingredientsData.find(ing => ing.name === select.value);
-            if (selectedIngredient && selectedIngredient.description) {
-                descriptionLabel.textContent = `* ${selectedIngredient.description}`;
-                descriptionLabel.style.display = 'block';
-                descriptionLabel.style.padding = '10px';
-            } else {
-                descriptionLabel.style.display = 'none';
-            }
-        });
-
-        div.appendChild(select);
-        div.appendChild(descriptionLabel);
-        quantityWrapper.appendChild(quantityInput);
-        quantityWrapper.appendChild(removeButton);
-        div.appendChild(quantityWrapper);
-        recipeInputs.appendChild(div);
-
-        updateCostDisplay();
-    }
-
-    function showMessage(message, type = 'success') {
-        const messageBox = document.getElementById('messageBox');
-        messageBox.textContent = message;
-        messageBox.className = 'message-box ' + type;
-        messageBox.style.display = 'block';
-
-        setTimeout(() => {
-            messageBox.classList.add('fade-out');
-        }, 3000);
-
-        setTimeout(() => {
-            messageBox.style.display = 'none';
-            messageBox.classList.remove('fade-out');
-        }, 4000);
-    }
-
-    async function deleteIngredient(name) {
-        const response = await fetch(`/ingredients/${name}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            updateIngredientList();
-            ingredientDropdown.value = '';
-        } else {
-            console.error('Erreur lors de la suppression de l\'ingrédient');
-        }
-    }
-
-    async function updateIngredientList() {
-        const response = await fetch('/ingredients');
-        const ingredients = await response.json();
-        ingredientsData = ingredients;
-
-        ingredientDropdown.innerHTML = '<option value="" disabled selected>Choisissez un ingrédient...</option>';
-        recipeInputs.innerHTML = '';
-
-        ingredients.forEach(ingredient => {
-            const option = document.createElement('option');
-            option.value = ingredient.name;
-            option.textContent = `${ingredient.name} (${ingredient.supplier}) - ${ingredient.pricePerKg} €/kg`;
-            ingredientDropdown.appendChild(option);
-        });
-
-
-        addIngredientInput();
-    }
-    updateIngredientList();
-</script>
-</body>
-</html>
+        updateIngredientList();
+    </script>
+    </body>
+    </html>

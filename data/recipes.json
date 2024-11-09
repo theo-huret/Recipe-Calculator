@@ -1,0 +1,22 @@
+{
+  "test-bien": {
+    "name": "test-bien",
+    "ingredients": [
+      {
+        "name": "Amandes",
+        "quantityKg": 12
+      },
+      {
+        "name": "Choco blanc",
+        "quantityKg": 13
+      },
+      {
+        "name": "Choco lait",
+        "quantityKg": 14
+      }
+    ],
+    "profitMargin": 50,
+    "hoursSpent": 4,
+    "electricityCost": 0.2
+  }
+}

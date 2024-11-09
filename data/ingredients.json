@@ -134,5 +134,11 @@
     "pricePerKg": 7.5,
     "description": "15€ la bombe mais une demie utilisation pour un entremet",
     "supplier": "La boutique à patisser"
+  },
+  {
+    "name": "testAdd",
+    "pricePerKg": 12,
+    "description": "test",
+    "supplier": "La boutique à patisser"
   }
 ]
